@@ -4,7 +4,7 @@ using ServiceApp;
 
 Console.WriteLine("Hello, World!");
 
-using var channel = GrpcChannel.ForAddress("https://localhost:7082");
+using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/"); //https://localhost:7082
 var client = new Greeter.GreeterClient(channel);
 
 var reply = await client.SayHelloAsync(new HelloRequest { Name = "GreeterClient" });
