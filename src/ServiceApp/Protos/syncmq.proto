@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option csharp_namespace = "Pars.Extensions.SyncMq";
+
+package syncmq;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
+
+service SyncMq {
+  rpc SendMessage (stream MessageBroker) returns (stream Result);
+  rpc GetMessages (GetRequest) returns (stream MessageBroker);
+}
+
+message MessageBroker {
+    string  message_id = 1;
+    string key = 2;
+    string topic = 3;
+    bytes data = 4;
+    map<string, bytes> headers = 5;
+}
+
+message Result {
+    string message_id = 1;
+    string key = 2;
+    string topic = 3;  
+    string error = 4;
+}
+
+message GetRequest {
+    string subscriber = 3;
+    string topic = 1;        
+    string scope = 2;
+    
+}
