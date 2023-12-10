@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using Google.Protobuf;
+using Grpc.Core;
 using Pars.Extensions.SyncMq;
 
 namespace ServiceApp.Services;
@@ -24,18 +25,21 @@ public class SyncMqService : SyncMq.SyncMqBase
     {
         int i = 0;
         int msg = 0;
-        _logger.LogInformation("Begintran {0}",i);
+        _logger.LogInformation("Begintran {tranid}", i);
         await foreach (var item in request.ReadAllAsync())
         {
-            var message = new MessageBroker() { Topic = item.Topic, Next = ++msg <= 3 };
-
+            var messageId = Guid.NewGuid().ToString();
+            var message = new MessageBroker() { MessageId = messageId, Topic = item.Topic, Next = ++msg < 3, Data = ByteString.CopyFromUtf8(messageId) };
+            await Task.Delay(1000);
             await responseStream.WriteAsync(message);
             if (item.Commit)
             {
-                _logger.LogInformation("Committran {0}", i);
-                _logger.LogInformation("Begintran {0}", ++i);
+                _logger.LogInformation("Committran {tranid}", i);
+                _logger.LogInformation("Begintran {tranid}", ++i);
             }
         }
-        _logger.LogInformation("Committran {0}", i);
+
+        if (context.Status.StatusCode == StatusCode.OK)    
+            _logger.LogInformation("Committran {tranid}", i);
     }
 }
