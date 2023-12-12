@@ -1,45 +1,73 @@
-﻿using Google.Protobuf;
+using Google.Protobuf;
 using Grpc.Core;
-using Pars.Extensions.SyncMq;
 
 namespace ServiceApp.Services;
 
-public class SyncMqService : SyncMq.SyncMqBase
+public class SyncMqService(ILogger<SyncMqService> logger) : SyncMq.SyncMqBase
 {
-    private readonly ILogger<SyncMqService> _logger;
+    private readonly ILogger<SyncMqService> _logger = logger;
+    private readonly HashSet<MessageBroker> _messages = [];
 
-    public SyncMqService(ILogger<SyncMqService> logger)
+    public override async Task Publish(IAsyncStreamReader<MessageBroker> requestStream, IServerStreamWriter<Respose> responseStream, ServerCallContext context)
     {
-        _logger = logger;
-    }
-
-    public override async Task SendMessage(IAsyncStreamReader<MessageBroker> requestStream, IServerStreamWriter<Result> responseStream, ServerCallContext context)
-    {
-        await foreach (var request in requestStream.ReadAllAsync())
+        _logger.LogInformation("publish begin");
+        while (await requestStream.MoveNext() && requestStream.Current is not null) 
         {
-            await responseStream.WriteAsync(new Result() { Topic = request.Topic, MessageId = request.MessageId, Key = request.Key });
-        }
-    }
-
-    public override async Task GetMessages(IAsyncStreamReader<Request> request, IServerStreamWriter<MessageBroker> responseStream, ServerCallContext context)
-    {
-        int i = 0;
-        int msg = 0;
-        _logger.LogInformation("Begintran {tranid}", i);
-        await foreach (var item in request.ReadAllAsync())
-        {
-            var messageId = Guid.NewGuid().ToString();
-            var message = new MessageBroker() { MessageId = messageId, Topic = item.Topic, Next = ++msg < 3, Data = ByteString.CopyFromUtf8(messageId) };
-            await Task.Delay(1000);
-            await responseStream.WriteAsync(message);
-            if (item.Commit)
+            string message_id = requestStream.Current.MessageId;
+            string topic = requestStream.Current.Topic;
+            _logger.LogInformation("{topic} {message_id} begin", topic, message_id);
+            using MemoryStream data = new();
+            do
             {
-                _logger.LogInformation("Committran {tranid}", i);
-                _logger.LogInformation("Begintran {tranid}", ++i);
-            }
-        }
+                data.Write(requestStream.Current.Data.Span);
+            } while (!(requestStream.Current?.MessageEof ?? true) && await requestStream.MoveNext());                        
 
-        if (context.Status.StatusCode == StatusCode.OK)    
-            _logger.LogInformation("Committran {tranid}", i);
+            _messages.Add(new MessageBroker()
+            {
+                MessageId = message_id,
+                Topic = topic,
+                Data = UnsafeByteOperations.UnsafeWrap(data.ToArray()),
+                MessageEof = true
+            });
+            _logger.LogInformation("{topic} {message_id} end {event_id} received bytes {byte:N0}", topic, message_id, _messages.Count, data.Length);
+
+            await responseStream.WriteAsync(new Respose() { EventId = _messages.Count });
+        }
+        _logger.LogInformation("publish end");
+    }
+
+    const int ChunkSize = 1024 * 64; // 64 KB    
+
+    public override async Task Subscribe(IAsyncStreamReader<Request> requestStream, IServerStreamWriter<MessageBroker> responseStream, ServerCallContext context)
+    {
+        var subscriber = context.RequestHeaders.Get("subscriber")?.Value;
+        var topics = context.RequestHeaders.Where(m => m.Key.StartsWith("topic")).Select(m => m.Value);
+        _logger.LogInformation("{subscriber} begin {topic}", subscriber, context.RequestHeaders.Get("topic")?.Value);
+        
+        foreach (var message in _messages.Where(m => topics.Contains(m.Topic)))        
+        {
+            var part = new MessageBroker()
+            {
+                Topic = message.Topic,
+                MessageId = message.MessageId
+            };
+
+            var buffer = new byte[ChunkSize];
+            using MemoryStream readStream = new(message.Data.ToByteArray());
+
+            var count = await readStream.ReadAsync(buffer);
+            while (count > 0)
+            {
+                part.Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count));
+                count = await readStream.ReadAsync(buffer);
+                part.MessageEof = count == 0;
+                await responseStream.WriteAsync(part);
+            }            
+
+            if (await requestStream.MoveNext())
+                _logger.LogInformation("{message id} {commit}", message.MessageId, requestStream.Current.Commit);
+
+        } //while (await requestStream.MoveNext());
+        _logger.LogInformation("{subscriber} end", subscriber);
     }
 }
