@@ -1,36 +1,27 @@
 syntax = "proto3";
 
-option csharp_namespace = "Pars.Extensions.SyncMq";
+option csharp_namespace = "ServiceApp";
 
 package syncmq;
 
-//import "google/protobuf/empty.proto";
-//import "google/protobuf/any.proto";
-
 service SyncMq {
-  rpc SendMessage (stream MessageBroker) returns (stream Result);
-  rpc GetMessages (stream Request) returns (stream MessageBroker);
+  rpc Publish (stream MessageBroker) returns (stream Respose);
+  rpc Subscribe (stream Request) returns (stream MessageBroker);
 }
 
 message MessageBroker {
-    string  message_id = 1;
-    string key = 2;
-    string topic = 3;
-    bytes data = 4;
-    map<string, bytes> headers = 5;
-    bool next = 6;
+  string topic = 1;
+  string message_id = 2;
+  bytes data = 3;
+  string dataAreaId = 4;
+  bool message_eof = 5;
 }
 
-message Result {
-    string message_id = 1;
-    string key = 2;
-    string topic = 3;  
-    string error = 4;
+// The response message containing the greetings.
+message Respose {
+  int64 event_id = 1;
 }
 
 message Request {
-    string topic = 1;        
-    string subscriber = 2;    
-    string scope = 3;
-    bool commit = 4;
-}
+  bool commit = 3;
+} 

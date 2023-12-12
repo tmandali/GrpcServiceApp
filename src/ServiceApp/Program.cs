@@ -1,10 +1,10 @@
-using Pars.Extensions.SyncMq;
 using ServiceApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddGrpc();
+builder.Services.AddSingleton<SyncMqService>();
 
 var app = builder.Build();
 
