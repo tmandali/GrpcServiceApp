@@ -1,12 +1,18 @@
 using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 
 namespace ServiceApp.Services;
 
-public class SyncMqService(ILogger<SyncMqService> logger) : SyncMq.SyncMqBase
+public class SyncMqService : SyncMq.SyncMqBase
 {
-    private readonly ILogger<SyncMqService> _logger = logger;
-    private readonly HashSet<MessageBroker> _messages = [];
+    private readonly ILogger<SyncMqService> _logger;
+    private readonly HashSet<MessageBroker> _messages = new();
+
+    public SyncMqService(ILogger<SyncMqService> logger)
+    {
+        _logger = logger;
+    }
 
     public override async Task Publish(IAsyncStreamReader<MessageBroker> requestStream, IServerStreamWriter<Respose> responseStream, ServerCallContext context)
     {

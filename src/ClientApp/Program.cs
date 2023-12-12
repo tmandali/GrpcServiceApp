@@ -3,7 +3,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using ServiceApp;
 
-using var channel = GrpcChannel.ForAddress("https://localhost:7153"
+using var channel = GrpcChannel.ForAddress("http://localhost:5121"
     , new()
     {
         HttpHandler = new HttpClientHandler()
