@@ -1,20 +1,32 @@
-# My gRPC Service
+# SyncMq gRPC Service
 
-## Proto File (service.proto)
+## Proto File (syncmq.proto)
 
 ```proto
 syntax = "proto3";
 
-package mypackage;
+option csharp_namespace = "ServiceApp";
 
-service MyService {
-  rpc MyMethod (MyRequest) returns (MyResponse);
+package syncmq;
+
+service SyncMq {
+  rpc Publish (stream MessageBroker) returns (stream Respose);
+  rpc Subscribe (stream Request) returns (stream MessageBroker);
 }
 
-message MyRequest {
-  string request_data = 1;
+message MessageBroker {
+  string topic = 1;
+  string message_id = 2;
+  bytes data = 3;
+  string dataAreaId = 4;
+  bool message_eof = 5;
 }
 
-message MyResponse {
-  string response_data = 1;
+// The response message containing the greetings.
+message Respose {
+  int64 event_id = 1;
 }
+
+message Request {
+  bool commit = 3;
+} 
