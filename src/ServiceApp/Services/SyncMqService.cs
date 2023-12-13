@@ -1,6 +1,8 @@
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Buffers;
 
 namespace ServiceApp.Services;
 
@@ -57,17 +59,26 @@ public class SyncMqService : SyncMq.SyncMqBase
                 Topic = message.Topic,
                 MessageId = message.MessageId
             };
+            
+            using MemoryStream readStream = new();
+            message.Data.WriteTo(readStream);
+            readStream.Seek(0, SeekOrigin.Begin);
 
-            var buffer = new byte[ChunkSize];
-            using MemoryStream readStream = new(message.Data.ToByteArray());
-
-            var count = await readStream.ReadAsync(buffer);
-            while (count > 0)
+            var buffer = ArrayPool<byte>.Shared.Rent(ChunkSize);            
+            try
             {
-                part.Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count));
-                count = await readStream.ReadAsync(buffer);
-                part.MessageEof = count == 0;
-                await responseStream.WriteAsync(part);
+                var count = await readStream.ReadAsync(buffer);
+                while (count > 0)
+                {
+                    part.Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count));
+                    count = await readStream.ReadAsync(buffer);
+                    part.MessageEof = count == 0;
+                    await responseStream.WriteAsync(part);
+                }
+            }
+            finally 
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
             }            
 
             if (await requestStream.MoveNext())
