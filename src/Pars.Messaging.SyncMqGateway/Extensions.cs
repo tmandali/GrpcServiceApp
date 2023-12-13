@@ -53,8 +53,13 @@ public static partial class Extensions
 
     public static async Task Subscribe(this SyncMqGateway.SyncMqGatewayClient client, string name, IEnumerable<string> topics)
     {
-        var metadata = (Metadata) topics.Select((topic, i) => new Metadata.Entry("topic." + i, topic));
-        metadata.Add("subscriber", name);
+        var metadata = new Metadata
+        {
+            { "subscriber", name }
+        };
+
+        foreach (var topic in topics.Select((s,i) => new KeyValuePair<string,string>("topic."+i, s)))
+            metadata.Add(topic.Key, topic.Value);
 
         using var subscriber = client.Subscribe(metadata);
         while (await subscriber.ResponseStream.MoveNext() && subscriber.ResponseStream.Current is not null)

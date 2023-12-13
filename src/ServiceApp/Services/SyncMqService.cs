@@ -1,12 +1,11 @@
 using Google.Protobuf;
 using Grpc.Core;
-using Microsoft.Extensions.Logging;
-using System;
+using Pars.Messaging;
 using System.Buffers;
 
 namespace ServiceApp.Services;
 
-public class SyncMqService : SyncMq.SyncMqBase
+public class SyncMqService : SyncMqGateway.SyncMqGatewayBase
 {
     private readonly ILogger<SyncMqService> _logger;
     private readonly HashSet<MessageBroker> _messages = new();

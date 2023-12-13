@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceApp", "ServiceApp\Se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyncMq", "SyncMq\SyncMq.csproj", "{D425278B-2D9E-41F9-97FB-BD5B5DAD96E1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pars.Messaging", "ClassLibrary1\Pars.Messaging.csproj", "{E8B53036-0AD5-4AC4-BB08-E45BA38ED71E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pars.Messaging.SyncMqGateway", "Pars.Messaging.SyncMqGateway\Pars.Messaging.SyncMqGateway.csproj", "{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{D425278B-2D9E-41F9-97FB-BD5B5DAD96E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D425278B-2D9E-41F9-97FB-BD5B5DAD96E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D425278B-2D9E-41F9-97FB-BD5B5DAD96E1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8B53036-0AD5-4AC4-BB08-E45BA38ED71E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8B53036-0AD5-4AC4-BB08-E45BA38ED71E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8B53036-0AD5-4AC4-BB08-E45BA38ED71E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8B53036-0AD5-4AC4-BB08-E45BA38ED71E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

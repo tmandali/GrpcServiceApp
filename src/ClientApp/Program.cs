@@ -1,7 +1,7 @@
 ﻿using Google.Protobuf;
 using Grpc.Core;
 using Grpc.Net.Client;
-using ServiceApp;
+using Pars.Messaging;
 
 using var channel = GrpcChannel.ForAddress("http://localhost:5121"
     , new()
@@ -13,7 +13,8 @@ using var channel = GrpcChannel.ForAddress("http://localhost:5121"
     }
 );
 
-SyncMq.SyncMqClient client = new SyncMq.SyncMqClient(channel);
+var client = new SyncMqGateway.SyncMqGatewayClient(channel);
+await client.Subscribe("subscriber", new[] { "/topic", "/topic1" });
 
 Console.WriteLine("Subsriber begin");
 var metadata = new Metadata
