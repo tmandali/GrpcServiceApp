@@ -133,7 +133,9 @@ public sealed class PublicationStream : IDisposable, IAsyncStreamWriter<MessageB
             while (count > 0)
             {
                 var part = new MessageBroker
-                {
+                {                    
+                    MessageId = message.MessageId,
+                    Topic = message.Topic,
                     Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count))
                 };
 

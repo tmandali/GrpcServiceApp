@@ -1,3 +1,4 @@
+using CommunityToolkit.HighPerformance;
 using Google.Protobuf;
 using Grpc.Core;
 using Pars.Messaging;
@@ -52,24 +53,21 @@ public class SyncMqService : SyncMqGateway.SyncMqGatewayBase
         _logger.LogInformation("{subscriber} begin {topic}", subscriber, context.RequestHeaders.Get("topic")?.Value);
         
         foreach (var message in _messages.Where(m => topics.Contains(m.Topic)))        
-        {
-            var part = new MessageBroker()
-            {
-                Topic = message.Topic,
-                MessageId = message.MessageId
-            };
-            
-            using MemoryStream readStream = new();
-            message.Data.WriteTo(readStream);
-            readStream.Seek(0, SeekOrigin.Begin);
-
+        {           
+            using var readStream = message.Data.Memory.AsStream();
             var buffer = ArrayPool<byte>.Shared.Rent(ChunkSize);            
             try
             {
                 var count = await readStream.ReadAsync(buffer);
                 while (count > 0)
                 {
-                    part.Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count));
+                    var part = new MessageBroker
+                    {
+                        Topic = message.Topic,
+                        MessageId = message.MessageId,
+                        Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count))
+                    };
+
                     count = await readStream.ReadAsync(buffer);
                     part.MessageEof = count == 0;
                     await responseStream.WriteAsync(part);

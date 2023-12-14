@@ -55,6 +55,7 @@ foreach (var file in new[] {
     @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-09-22 101712.png" })
 {
     await using var readStream = File.OpenRead(file);
+    readStream.Seek(0, SeekOrigin.Begin);   
     var message = new MessageBroker() {
         MessageId = Guid.NewGuid().ToString(),
         Topic = "/topic",
