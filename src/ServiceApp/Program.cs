@@ -1,3 +1,4 @@
+using Grpc.Net.Client.Balancer;
 using ServiceApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,3 +13,9 @@ var app = builder.Build();
 app.MapGrpcService<SyncMqService>();
 app.MapGet("/", () => "Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
 app.Run();
+
+var factory = new StaticResolverFactory(addr => new[]
+{
+    new BalancerAddress("localhost", 80),
+    new BalancerAddress("localhost", 81)
+});
