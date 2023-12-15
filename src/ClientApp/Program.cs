@@ -3,7 +3,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Pars.Messaging;
 
-using var channel = GrpcChannel.ForAddress("http://localhost:5121"
+using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/" //"http://localhost:5121"
     , new() 
     {
         HttpHandler = new HttpClientHandler()
@@ -45,24 +45,3 @@ await publisher.CompleteAsync();
 Console.WriteLine("Shutting down");
 Console.WriteLine("Press any key to exit...");
 Console.ReadKey();
-
-//static void TestGrpcNetClient(GrpcChannel channel, string testName)
-//{
-//    var callInvoker = channel.CreateCallInvoker();
-//    var marshaller = new Marshaller<string>(Encoding.UTF8.GetBytes, Encoding.UTF8.GetString);
-//    var method = new Method<string, string>(MethodType.Unary,
-//        "test-service", "test-method",
-//        marshaller, marshaller);
-//    try
-//    {
-//        Console.WriteLine($"Starting request for {testName}.");
-//        var response = callInvoker.BlockingUnaryCall(method, null,
-//            default, "test-request");
-//        Console.WriteLine($"Got response {response} for {testName}.");
-//    }
-//    catch (Exception e)
-//    {
-//        Console.WriteLine($"{testName} failed.");
-//        Console.WriteLine(e);
-//    }
-//}
