@@ -1,10 +1,12 @@
+using CommunityToolkit.HighPerformance;
 using Google.Protobuf;
 using Grpc.Core;
-using Microsoft.Extensions.Logging;
+using Pars.Messaging;
+using System.Buffers;
 
 namespace ServiceApp.Services;
 
-public class SyncMqService : SyncMq.SyncMqBase
+public class SyncMqService : SyncMqGateway.SyncMqGatewayBase
 {
     private readonly ILogger<SyncMqService> _logger;
     private readonly HashSet<MessageBroker> _messages = new();
@@ -51,23 +53,29 @@ public class SyncMqService : SyncMq.SyncMqBase
         _logger.LogInformation("{subscriber} begin {topic}", subscriber, context.RequestHeaders.Get("topic")?.Value);
         
         foreach (var message in _messages.Where(m => topics.Contains(m.Topic)))        
-        {
-            var part = new MessageBroker()
+        {           
+            using var readStream = message.Data.Memory.AsStream();
+            var buffer = ArrayPool<byte>.Shared.Rent(ChunkSize);            
+            try
             {
-                Topic = message.Topic,
-                MessageId = message.MessageId
-            };
+                var count = await readStream.ReadAsync(buffer);
+                while (count > 0)
+                {
+                    var part = new MessageBroker
+                    {
+                        Topic = message.Topic,
+                        MessageId = message.MessageId,
+                        Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count))
+                    };
 
-            var buffer = new byte[ChunkSize];
-            using MemoryStream readStream = new(message.Data.ToByteArray());
-
-            var count = await readStream.ReadAsync(buffer);
-            while (count > 0)
+                    count = await readStream.ReadAsync(buffer);
+                    part.MessageEof = count == 0;
+                    await responseStream.WriteAsync(part);
+                }
+            }
+            finally 
             {
-                part.Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count));
-                count = await readStream.ReadAsync(buffer);
-                part.MessageEof = count == 0;
-                await responseStream.WriteAsync(part);
+                ArrayPool<byte>.Shared.Return(buffer);
             }            
 
             if (await requestStream.MoveNext())

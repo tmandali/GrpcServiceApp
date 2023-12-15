@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option csharp_namespace = "ServiceApp";
+option csharp_namespace = "Pars.Messaging";
 
 package syncmq;
 
-service SyncMq {
+service SyncMqGateway {
   rpc Publish (stream MessageBroker) returns (stream Respose);
   rpc Subscribe (stream Request) returns (stream MessageBroker);
 }

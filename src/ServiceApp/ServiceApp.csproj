@@ -5,13 +5,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>	
   </PropertyGroup>
-
+	
   <ItemGroup>
-	<Protobuf Include="Protos\syncmq.proto" GrpcServices="Server" />
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
   </ItemGroup>
 	
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
+    <Protobuf Include="..\Pars.Messaging.SyncMqGateway\Protos\syncmq.proto" GrpcServices="Server">
+      <Link>Protos\syncmq.proto</Link>
+    </Protobuf>
   </ItemGroup>
 
 </Project>
