@@ -17,7 +17,7 @@ public sealed class PublicationStream : IDisposable
         _streamingCall = streamingCall;
     }
 
-    public async Task<long> WriteAsync(string topic, string messageId, Stream data, int size = 1024 * 65)
+    public async Task<long> WriteAsync(string topic, string messageId, Stream data, string dataAreaId = null, int size = 1024 * 65)
     {     
         var buffer = ArrayPool<byte>.Shared.Rent(size);
         try
@@ -29,6 +29,7 @@ public sealed class PublicationStream : IDisposable
                 {                    
                     MessageId = messageId,
                     Topic = topic,
+                    DataAreaId = dataAreaId,
                     Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count)),
                     MessageEof = false
                 };
