@@ -1,5 +1,4 @@
-﻿using Google.Protobuf;
-using Grpc.Core;
+﻿using Grpc.Core;
 using Grpc.Net.Client;
 using Pars.Messaging;
 
@@ -32,13 +31,7 @@ foreach (var file in new[] {
     @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-09-22 101712.png" })
 {
     await using var readStream = File.OpenRead(file);
-    var message = new MessageBroker() {
-        MessageId = Guid.NewGuid().ToString(),
-        Topic = "/topic",
-        Data = ByteString.FromStream(readStream)
-    };
-
-    await publisher.WriteAsync(message);
+    var id = await publisher.WriteAsync("/topic", Guid.NewGuid().ToString(), readStream);
 }
 await publisher.CompleteAsync();
 
