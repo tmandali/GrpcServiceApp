@@ -15,7 +15,7 @@ using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.ne
 Console.WriteLine("Subsriber begin"); 
 
 var client = new SyncMqGateway.SyncMqGatewayClient(channel);
-using var subscriber = client.CreateSubscriptionStream("subscriber", new[]{ "/topic", "/topic1" });
+var subscriber =  client.CreateSubscriptionStream("subscriber", new[]{ "/topic", "/topic1" });
 await foreach (var message in subscriber.ReadAllAsync())
 {
     Console.WriteLine("{0} {1} message received, bytes {2:N0}", message.Topic, message.MessageId, message.Value.Length);

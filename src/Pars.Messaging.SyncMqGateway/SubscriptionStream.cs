@@ -1,31 +1,25 @@
 ﻿using Grpc.Core;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pars.Messaging;
 
-public sealed class SubscriptionStream<T> : IDisposable, IAsyncStreamReader<MessageBroker<T>>
+public sealed class SubscriptionStream<T> : IAsyncEnumerator<MessageBroker<T>>
 {
     private readonly AsyncDuplexStreamingCall<Request, MessageBroker> _streamingCall;
+    private readonly Func<byte[], Task<T>> _deserializer;
     private readonly bool _autoCommit;
-
-    private readonly Func<Byte[], Task<T>> _serializer;
-
-    public SubscriptionStream(AsyncDuplexStreamingCall<Request, MessageBroker> streamingCall, Func<Byte[], Task<T>> serializer, bool autoCommit = true)
+    
+    public SubscriptionStream(AsyncDuplexStreamingCall<Request, MessageBroker> streamingCall, Func<byte[], Task<T>> deserializer, bool autoCommit = true)
     {
         _streamingCall = streamingCall;
+        _deserializer = deserializer;
         _autoCommit = autoCommit;
-        _serializer = serializer;
     }
 
     public MessageBroker<T> Current { get; private set; }
-
-    public void Dispose()
-    {
-        _streamingCall?.Dispose();
-    }
 
     public async ValueTask CommitAsync()
     {
@@ -33,23 +27,28 @@ public sealed class SubscriptionStream<T> : IDisposable, IAsyncStreamReader<Mess
             await _streamingCall.RequestStream.WriteAsync(new Request() { Commit = true });
     }
 
-    public async Task<bool> MoveNext(CancellationToken cancellationToken)
+    public async ValueTask DisposeAsync()
     {
-        if (await _streamingCall.ResponseStream.MoveNext(cancellationToken) && _streamingCall.ResponseStream.Current is not null)
+        _streamingCall?.Dispose();
+    }
+
+    public async ValueTask<bool> MoveNextAsync()
+    {
+        if (await _streamingCall.ResponseStream.MoveNext() && _streamingCall.ResponseStream.Current is not null)
         {
             using MemoryStream data = new();
             do
             {
                 _streamingCall.ResponseStream.Current.Data.WriteTo(data);   
-            } while (!(_streamingCall.ResponseStream.Current?.MessageEof ?? true) && await _streamingCall.ResponseStream.MoveNext(cancellationToken));
+            } while (!(_streamingCall.ResponseStream.Current?.MessageEof ?? true) && await _streamingCall.ResponseStream.MoveNext());
 
             data.Seek(0, SeekOrigin.Begin);
 
             Current = new MessageBroker<T>(
-                _streamingCall.ResponseStream.Current.Topic,                 
+                _streamingCall.ResponseStream.Current.Topic, 
                 _streamingCall.ResponseStream.Current.MessageId, 
-                _streamingCall.ResponseStream.Current.DataAreaId,
-                await _serializer(data.ToArray()));
+                _streamingCall.ResponseStream.Current.DataAreaId, 
+                await _deserializer(data.ToArray()));
 
             if (_autoCommit)
                 await _streamingCall.RequestStream.WriteAsync(new Request() { Commit = _autoCommit });
@@ -58,5 +57,5 @@ public sealed class SubscriptionStream<T> : IDisposable, IAsyncStreamReader<Mess
         }
 
         return false;
-    }
+    }    
 }
