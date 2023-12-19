@@ -1,6 +1,7 @@
 ﻿using Grpc.Core;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -35,6 +36,13 @@ public static partial class Extensions
     public static PublicationStream CreatePublicationStream(this SyncMqGateway.SyncMqGatewayClient client)
     {
         return new PublicationStream(client.Publish());
+    }
+
+    public static async Task<long> WriteJsonAsync<T>(this PublicationStream publisher, string topic, string messageId, T value, string dataAreaId = null, JsonSerializerOptions options = null, int size = 1024 * 65)
+    {
+        using var stream = new MemoryStream();
+        JsonSerializer.SerializeToUtf8Bytes(value, options);
+        return await publisher.WriteAsync(topic, messageId, stream, dataAreaId, size);
     }
 
     public static async IAsyncEnumerable<T> ReadAllAsync<T>(this IAsyncEnumerator<T> streamReader)
