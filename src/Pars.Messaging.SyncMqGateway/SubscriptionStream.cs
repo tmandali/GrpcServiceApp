@@ -1,5 +1,4 @@
-﻿using Google.Protobuf;
-using Grpc.Core;
+﻿using Grpc.Core;
 using System;
 using System.IO;
 using System.Threading;
@@ -7,18 +6,21 @@ using System.Threading.Tasks;
 
 namespace Pars.Messaging;
 
-public sealed class SubscriptionStream : IDisposable, IAsyncStreamReader<MessageBroker>
+public sealed class SubscriptionStream<T> : IDisposable, IAsyncStreamReader<MessageBroker<T>>
 {
     private readonly AsyncDuplexStreamingCall<Request, MessageBroker> _streamingCall;
     private readonly bool _autoCommit;
 
-    public SubscriptionStream(AsyncDuplexStreamingCall<Request, MessageBroker> streamingCall, bool autoCommit = true)
+    private readonly Func<Byte[], Task<T>> _serializer;
+
+    public SubscriptionStream(AsyncDuplexStreamingCall<Request, MessageBroker> streamingCall, Func<Byte[], Task<T>> serializer, bool autoCommit = true)
     {
         _streamingCall = streamingCall;
         _autoCommit = autoCommit;
+        _serializer = serializer;
     }
 
-    public MessageBroker Current { get; private set; }
+    public MessageBroker<T> Current { get; private set; }
 
     public void Dispose()
     {
@@ -35,12 +37,6 @@ public sealed class SubscriptionStream : IDisposable, IAsyncStreamReader<Message
     {
         if (await _streamingCall.ResponseStream.MoveNext(cancellationToken) && _streamingCall.ResponseStream.Current is not null)
         {
-            Current = new MessageBroker()
-            {
-                MessageId = _streamingCall.ResponseStream.Current.MessageId,
-                Topic = _streamingCall.ResponseStream.Current.Topic,
-            };
-
             using MemoryStream data = new();
             do
             {
@@ -48,8 +44,12 @@ public sealed class SubscriptionStream : IDisposable, IAsyncStreamReader<Message
             } while (!(_streamingCall.ResponseStream.Current?.MessageEof ?? true) && await _streamingCall.ResponseStream.MoveNext(cancellationToken));
 
             data.Seek(0, SeekOrigin.Begin);
-            Current.MessageEof = true;
-            Current.Data = await ByteString.FromStreamAsync(data);
+
+            Current = new MessageBroker<T>(
+                _streamingCall.ResponseStream.Current.Topic,                 
+                _streamingCall.ResponseStream.Current.MessageId, 
+                _streamingCall.ResponseStream.Current.DataAreaId,
+                await _serializer(data.ToArray()));
 
             if (_autoCommit)
                 await _streamingCall.RequestStream.WriteAsync(new Request() { Commit = _autoCommit });
