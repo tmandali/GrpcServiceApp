@@ -23,14 +23,14 @@ public static partial class Extensions
         return new SubscriptionStream<T>(client.Subscribe(metadata), deserializer, autocommit);
     }
 
-    public static IAsyncEnumerator<MessageBroker<byte[]>> CreateSubscriptionStream(this SyncMqGateway.SyncMqGatewayClient client, string name, IEnumerable<string> topics, bool autocommit = true)
+    public static SubscriptionStream<byte[]> CreateSubscriptionStream(this SyncMqGateway.SyncMqGatewayClient client, string name, IEnumerable<string> topics, bool autocommit = true)
     {
         return client.CreateSubscriptionStream(name, topics, data => Task.FromResult(data), autocommit);
     }
    
-    public static IAsyncEnumerator<MessageBroker<T>> CreateSubscriptionJsonStream<T>(this SyncMqGateway.SyncMqGatewayClient client, string name, IEnumerable<string> topics, JsonSerializerOptions options = null, bool autocommit = true)
+    public static SubscriptionStream<T> CreateSubscriptionJsonStream<T>(this SyncMqGateway.SyncMqGatewayClient client, string name, IEnumerable<string> topics, JsonSerializerOptions options = null, bool autocommit = true)
     {
-        return client.CreateSubscriptionStream<T>(name, topics, data => Task.FromResult(JsonSerializer.Deserialize<T>(data, options)), autocommit);
+        return client.CreateSubscriptionStream(name, topics, data => Task.FromResult(JsonSerializer.Deserialize<T>(data, options)), autocommit);
     }
 
     public static PublicationStream CreatePublicationStream(this SyncMqGateway.SyncMqGatewayClient client)
@@ -41,8 +41,9 @@ public static partial class Extensions
     public static async Task<long> WriteJsonAsync<T>(this PublicationStream publisher, string topic, string messageId, T value, string dataAreaId = null, JsonSerializerOptions options = null, int size = 1024 * 65)
     {
         using var stream = new MemoryStream();
-        JsonSerializer.SerializeToUtf8Bytes(value, options);
-        return await publisher.WriteAsync(topic, messageId, stream, dataAreaId, size);
+        await JsonSerializer.SerializeAsync(stream, value, options);
+        stream.Seek(0, SeekOrigin.Begin);
+        return await publisher.WriteAsync(topic, messageId, stream, dataAreaId, (int) stream.Length);
     }
 
     public static async IAsyncEnumerable<T> ReadAllAsync<T>(this IAsyncEnumerator<T> streamReader)

@@ -29,7 +29,7 @@ public sealed class SubscriptionStream<T> : IAsyncEnumerator<MessageBroker<T>>
 
     public async ValueTask DisposeAsync()
     {
-        _streamingCall?.Dispose();
+        await Task.Run(() => _streamingCall?.Dispose());        
     }
 
     public async ValueTask<bool> MoveNextAsync()

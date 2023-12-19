@@ -29,7 +29,7 @@ public sealed class PublicationStream : IDisposable
                 {                    
                     MessageId = messageId,
                     Topic = topic,
-                    DataAreaId = dataAreaId,
+                    DataAreaId = dataAreaId ?? string.Empty,
                     Data = UnsafeByteOperations.UnsafeWrap(buffer.AsMemory(0, count)),
                     MessageEof = false
                 };
