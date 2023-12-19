@@ -12,8 +12,10 @@ using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.ne
     }
 );
 
+SyncMqGateway.RegisterJsonType<Person>();
+
 var client = new SyncMqGateway.SyncMqGatewayClient(channel);
-var subscriber = client.CreateSubscriptionJsonStream<Person>("subscriber", new[] { "/person" });
+var subscriber = client.CreateSubscriptionStream<Person>("subscriber", new[] { "/person" });
 await foreach (var message in subscriber.ReadAllAsync())
 {
 
@@ -22,7 +24,7 @@ await foreach (var message in subscriber.ReadAllAsync())
 Console.ReadLine();
 
 using var publisher = client.CreatePublicationStream();
-await publisher.WriteJsonAsync("/person", Guid.NewGuid().ToString(), new Person() { Id = 1, Name = "Timur" });
+await publisher.WriteJsonAsync("/person", Guid.NewGuid().ToString(), new Person(1, "Timur"));
 await publisher.CompleteAsync();
 
 
@@ -52,10 +54,3 @@ await publisher.CompleteAsync();
 Console.WriteLine("Shutting down");
 Console.WriteLine("Press any key to exit...");
 Console.ReadKey();
-
-
-public class Person
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-}
