@@ -11,10 +11,16 @@ using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.ne
             UseProxy = false,
         }
     }
+
 );
 
 PersonStream.RegisterPerson();
 var client = new SyncMqGateway.SyncMqGatewayClient(channel);
+
+await client.WritePersonCreateAsync(new SoftwareArchitech(1, "Timur"), new SoftwareDeveloper(2, "Ahmet"));
+
+Console.ReadLine();
+
 var subscriber = client.CreatePersonSubscription();
 await foreach (var message in subscriber.ReadAllAsync())
 {
@@ -27,9 +33,6 @@ await foreach (var message in subscriber.ReadAllAsync())
 
     Console.WriteLine(result);
 }
-
-Console.ReadLine();
-await client.WritePersonCreateAsync(new SoftwareArchitech(1, "Timur"), new SoftwareDeveloper(2, "Ahmet"));
 
 //Console.WriteLine("Subsriber begin"); 
 //var client = new SyncMqGateway.SyncMqGatewayClient(channel);
