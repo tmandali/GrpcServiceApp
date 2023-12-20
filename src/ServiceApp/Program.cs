@@ -1,3 +1,4 @@
+using Grpc.Core;
 using ServiceApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);

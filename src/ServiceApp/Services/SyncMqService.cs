@@ -50,8 +50,8 @@ public class SyncMqService : SyncMqGateway.SyncMqGatewayBase
     {
         var subscriber = context.RequestHeaders.Get("subscriber")?.Value;
         var topics = context.RequestHeaders.Where(m => m.Key.StartsWith("topic")).Select(m => m.Value);
-        _logger.LogInformation("{subscriber} begin {topic}", subscriber, context.RequestHeaders.Get("topic")?.Value);
-        
+        _logger.LogInformation("{subscriber} begin {topic}", subscriber, context.RequestHeaders.Get("topic")?.Value);        
+
         foreach (var message in _messages.Where(m => topics.Contains(m.Topic)))        
         {           
             using var readStream = message.Data.Memory.AsStream();
@@ -79,7 +79,11 @@ public class SyncMqService : SyncMqGateway.SyncMqGatewayBase
             }            
 
             if (await requestStream.MoveNext())
+            {
                 _logger.LogInformation("{message id} {commit}", message.MessageId, requestStream.Current.Commit);
+                if (requestStream.Current.Commit)
+                    _messages.Remove(message);
+            }                
 
         } //while (await requestStream.MoveNext());
         _logger.LogInformation("{subscriber} end", subscriber);

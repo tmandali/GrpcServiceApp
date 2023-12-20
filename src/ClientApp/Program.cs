@@ -1,9 +1,9 @@
-﻿using Google.Protobuf;
+﻿using ClientApp.Person;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Pars.Messaging;
 
-using var channel = GrpcChannel.ForAddress("http://localhost:5121"
+using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/" //"http://localhost:5121"
     , new() 
     {
         HttpHandler = new HttpClientHandler()
@@ -13,56 +13,46 @@ using var channel = GrpcChannel.ForAddress("http://localhost:5121"
     }
 );
 
-Console.WriteLine("Subsriber begin"); 
-
+PersonStream.RegisterPerson();
 var client = new SyncMqGateway.SyncMqGatewayClient(channel);
-using var subscriber = client.CreateSubscriptionStream("subscriber", new[]{ "/topic", "/topic1" });
+var subscriber = client.CreatePersonSubscription();
 await foreach (var message in subscriber.ReadAllAsync())
 {
-    Console.WriteLine("{0} {1} message received, bytes {2:N0}", message.Topic, message.MessageId, message.Data.Length);
-}
-
-Console.WriteLine("Subsriber end");
-Console.ReadLine();
-
-using var publisher = client.CreatePublicationStream();
-foreach (var file in new[] {
-    @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-06-15 141121.png",
-    @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-09-22 101652.png",
-    @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-09-22 101712.png" })
-{
-    await using var readStream = File.OpenRead(file);
-    var message = new MessageBroker() {
-        MessageId = Guid.NewGuid().ToString(),
-        Topic = "/topic",
-        Data = ByteString.FromStream(readStream)
+    var result = message.Value switch
+    {
+        SoftwareArchitech architech => $"Architech {architech.Name}",
+        SoftwareDeveloper developer => $"Developer {developer.Name}",
+        _ => string.Empty
     };
 
-    await publisher.WriteAsync(message);
+    Console.WriteLine(result);
 }
-await publisher.CompleteAsync();
+
+Console.ReadLine();
+await client.WritePersonCreateAsync(new SoftwareArchitech(1, "Timur"), new SoftwareDeveloper(2, "Ahmet"));
+
+//Console.WriteLine("Subsriber begin"); 
+//var client = new SyncMqGateway.SyncMqGatewayClient(channel);
+//var subscriber =  client.CreateSubscriptionStream("subscriber", new[]{ "/topic", "/topic1" });
+//await foreach (var message in subscriber.ReadAllAsync())
+//{
+//    Console.WriteLine("{0} {1} message received, bytes {2:N0}", message.Topic, message.MessageId, message.Value.Length);
+//}
+
+//Console.WriteLine("Subsriber end");
+//Console.ReadLine();
+
+//using var publisher = client.CreatePublicationStream();
+//foreach (var file in new[] {
+//    @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-06-15 141121.png",
+//    @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-09-22 101652.png",
+//    @"C:\Users\tmand\Pictures\Ekran görüntüsü 2023-09-22 101712.png" })
+//{
+//    await using var readStream = File.OpenRead(file);
+//    var id = await publisher.WriteAsync("/topic", Guid.NewGuid().ToString(), readStream);
+//}
+//await publisher.CompleteAsync();
 
 Console.WriteLine("Shutting down");
 Console.WriteLine("Press any key to exit...");
 Console.ReadKey();
-
-//static void TestGrpcNetClient(GrpcChannel channel, string testName)
-//{
-//    var callInvoker = channel.CreateCallInvoker();
-//    var marshaller = new Marshaller<string>(Encoding.UTF8.GetBytes, Encoding.UTF8.GetString);
-//    var method = new Method<string, string>(MethodType.Unary,
-//        "test-service", "test-method",
-//        marshaller, marshaller);
-//    try
-//    {
-//        Console.WriteLine($"Starting request for {testName}.");
-//        var response = callInvoker.BlockingUnaryCall(method, null,
-//            default, "test-request");
-//        Console.WriteLine($"Got response {response} for {testName}.");
-//    }
-//    catch (Exception e)
-//    {
-//        Console.WriteLine($"{testName} failed.");
-//        Console.WriteLine(e);
-//    }
-//}
