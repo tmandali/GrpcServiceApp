@@ -12,7 +12,7 @@ using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.ne
 );
 
 var personStream = new PersonStream(channel);
-await personStream.WritePersonCreateAsync(new SoftwareArchitech(1, "Timur"), new SoftwareDeveloper(2, "Ahmet"));
+await personStream.WritePersonCreateAsync(new SoftwareArchitech() { Id = 1, Name = "Timur" }, new SoftwareDeveloper() { Id = 1, Name = "Mehmet" });
 
 var subscriber = personStream.CreateSubscription();
 while (await subscriber.MoveNextAsync())

@@ -11,7 +11,8 @@ public class PersonStream
     public PersonStream(GrpcChannel channel)
     {
         client = new SyncMqGatewayClient(channel);
-        RegisterJsonType<Person>(new[] { typeof(SoftwareDeveloper), typeof(SoftwareArchitech) });        
+        //RegisterJsonType<Person>(new[] { typeof(SoftwareDeveloper), typeof(SoftwareArchitech) });
+        RegisterXmlType<Person>(new[] { typeof(SoftwareDeveloper), typeof(SoftwareArchitech) });
     }
 
     public SubscriptionStream<Person> CreateSubscription()
