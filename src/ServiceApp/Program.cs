@@ -8,6 +8,7 @@ builder.Services.AddGrpc();
 builder.Services.AddSingleton<SyncMqService>();
 
 var app = builder.Build();
+app.UseGrpcWeb();
 
 // Configure the HTTP request pipeline.
 app.MapGrpcService<SyncMqService>().EnableGrpcWeb() ;

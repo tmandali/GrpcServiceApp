@@ -11,7 +11,7 @@ namespace ConsoleApp1
         static async Task Main()
         {
             var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/",
-                new GrpcChannelOptions() { HttpHandler = new GrpcWebHandler(new WinHttpHandler())});            
+                new GrpcChannelOptions() { HttpHandler = new WinHttpHandler()});            
             var personStream = new PersonStream(channel);
 
             await personStream.WritePersonCreateAsync(
