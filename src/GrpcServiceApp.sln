@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceApp", "ServiceApp\Se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pars.Messaging.SyncMqGateway", "Pars.Messaging.SyncMqGateway\Pars.Messaging.SyncMqGateway.csproj", "{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppFramework", "ConsoleAppFramework\ConsoleAppFramework.csproj", "{3D545E94-1617-4992-ACDF-9BA636EDBD8B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{9876589C-678E-4D0D-B94A-9AB7DD157E42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3D545E94-1617-4992-ACDF-9BA636EDBD8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3D545E94-1617-4992-ACDF-9BA636EDBD8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3D545E94-1617-4992-ACDF-9BA636EDBD8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3D545E94-1617-4992-ACDF-9BA636EDBD8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9876589C-678E-4D0D-B94A-9AB7DD157E42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9876589C-678E-4D0D-B94A-9AB7DD157E42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9876589C-678E-4D0D-B94A-9AB7DD157E42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9876589C-678E-4D0D-B94A-9AB7DD157E42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

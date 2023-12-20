@@ -40,7 +40,7 @@ public static partial class SyncMqGateway
         return new PublicationStream(client.Publish());
     }
 
-    public static async Task<long> WriteAsync<T>(this PublicationStream publisher, string topic, T value, string messageId = null, string dataAreaId = null, JsonSerializerOptions options = null)
+    public static async Task<long> WriteAsync<T>(this PublicationStream publisher, string topic, T value, string messageId = null, string dataAreaId = null)
     {
         if (registerStreams.TryGetValue(typeof(T), out var resolver) && resolver is ISyncMqStream<T> syncMqStream)
         {

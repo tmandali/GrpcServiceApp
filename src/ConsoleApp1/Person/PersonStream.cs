@@ -37,7 +37,7 @@ namespace ConsoleAppFramework.Person
             {
                 foreach (var person in persons)
                 {
-                    await publisher.WriteAsync(topic, person);
+                    await publisher.WriteAsync<Person>(topic, person, "", null);
                 }
                 await publisher.CompleteAsync();
             }
