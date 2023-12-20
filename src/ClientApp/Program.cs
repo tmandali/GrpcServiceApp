@@ -1,4 +1,5 @@
-﻿using Grpc.Core;
+﻿using ClientApp.Person;
+using Grpc.Core;
 using Grpc.Net.Client;
 using Pars.Messaging;
 
@@ -12,22 +13,25 @@ using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.ne
     }
 );
 
-SyncMqGateway.RegisterJsonType<Person>();
+PersonStream.RegisterPerson();
 var client = new SyncMqGateway.SyncMqGatewayClient(channel);
-var subscriber = client.CreateSubscriptionStream<Person>("subscriber", new[] { "/person_create", "/person_update" });
+var subscriber = client.CreatePersonSubscription();
 await foreach (var message in subscriber.ReadAllAsync())
 {
-    
+    var result = message.Value switch
+    {
+        SoftwareArchitech architech => $"Architech {architech.Name}",
+        SoftwareDeveloper developer => $"Developer {developer.Name}",
+        _ => string.Empty
+    };
+
+    Console.WriteLine(result);
 }
 
 Console.ReadLine();
-
-using var publisher = client.CreatePublicationStream();
-await publisher.WriteAsync("/person_create", new Person(1, "Timur"));
-await publisher.CompleteAsync();
+await client.WritePersonCreateAsync(new SoftwareArchitech(1, "Timur"), new SoftwareDeveloper(2, "Ahmet"));
 
 //Console.WriteLine("Subsriber begin"); 
-
 //var client = new SyncMqGateway.SyncMqGatewayClient(channel);
 //var subscriber =  client.CreateSubscriptionStream("subscriber", new[]{ "/topic", "/topic1" });
 //await foreach (var message in subscriber.ReadAllAsync())

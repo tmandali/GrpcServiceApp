@@ -12,7 +12,7 @@ public class PolymorphicTypeResolver<T> : DefaultJsonTypeInfoResolver
     private readonly Type _baseType = typeof(T);
 
     public PolymorphicTypeResolver(IEnumerable<Type> derivedTypes = null, string typeDiscriminatorPropertyName = "$type", Func<Type, string> nameResolver = null)
-    {
+    {        
         _options = new JsonPolymorphismOptions()
         {
             TypeDiscriminatorPropertyName = typeDiscriminatorPropertyName,
@@ -20,11 +20,12 @@ public class PolymorphicTypeResolver<T> : DefaultJsonTypeInfoResolver
             UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
         };
 
+        nameResolver ??= t => t.Name;
+
         if (derivedTypes is not null)
             foreach (var derivedType in derivedTypes)
             {
-                _options.DerivedTypes.Add(
-                    nameResolver is null ? new JsonDerivedType(derivedType) : new JsonDerivedType(derivedType, nameResolver(derivedType)));
+                _options.DerivedTypes.Add(new JsonDerivedType(derivedType, nameResolver(derivedType)));
             }
     }
 
