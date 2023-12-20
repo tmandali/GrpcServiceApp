@@ -1,7 +1,5 @@
 ﻿using ClientApp.Person;
-using Grpc.Core;
 using Grpc.Net.Client;
-using Pars.Messaging;
 
 using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/" //"http://localhost:5121"
     , new() 
@@ -13,23 +11,22 @@ using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.ne
     }
 );
 
-PersonStream.RegisterPerson();
-var client = new SyncMqGateway.SyncMqGatewayClient(channel);
-var subscriber = client.CreatePersonSubscription();
-await foreach (var message in subscriber.ReadAllAsync())
+var personStream = new PersonStream(channel);
+await personStream.WritePersonCreateAsync(
+    new SoftwareArchitech() { Id = 1, Name = "Timur" }, 
+    new SoftwareDeveloper() { Id = 1, Name = "Mehmet" });
+
+var subscriber = personStream.CreateSubscription();
+while (await subscriber.MoveNextAsync())
 {
-    var result = message.Value switch
+    var result = subscriber.Current.Value switch
     {
         SoftwareArchitech architech => $"Architech {architech.Name}",
         SoftwareDeveloper developer => $"Developer {developer.Name}",
         _ => string.Empty
     };
-
     Console.WriteLine(result);
 }
-
-Console.ReadLine();
-await client.WritePersonCreateAsync(new SoftwareArchitech(1, "Timur"), new SoftwareDeveloper(2, "Ahmet"));
 
 //Console.WriteLine("Subsriber begin"); 
 //var client = new SyncMqGateway.SyncMqGatewayClient(channel);

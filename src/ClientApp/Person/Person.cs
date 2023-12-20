@@ -1,7 +1,15 @@
 ﻿namespace ClientApp.Person;
 
-public abstract record class Person (int Id, string Name);
+public abstract class Person 
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;  
+};
 
-public record SoftwareArchitech(int Id, string Name) : Person(Id, Name);
+public class SoftwareArchitech : Person
+{
+}
 
-public record SoftwareDeveloper(int Id, string Name) : Person(Id, Name);
+public class SoftwareDeveloper : Person
+{
+}
