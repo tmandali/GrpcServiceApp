@@ -1,7 +1,5 @@
 ﻿using ClientApp.Person;
-using Grpc.Core;
 using Grpc.Net.Client;
-using Pars.Messaging;
 
 using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/" //"http://localhost:5121"
     , new() 
