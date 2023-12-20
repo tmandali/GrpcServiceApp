@@ -9,10 +9,10 @@ namespace Pars.Messaging;
 public sealed class SubscriptionStream<T> : IAsyncEnumerator<MessageBroker<T>>
 {
     private readonly AsyncDuplexStreamingCall<Request, MessageBroker> _streamingCall;
-    private readonly Func<byte[], T> _deserializer;
+    private readonly Func<Stream, ValueTask<T>> _deserializer;
     private readonly bool _autoCommit;
     
-    public SubscriptionStream(AsyncDuplexStreamingCall<Request, MessageBroker> streamingCall, Func<byte[], T> deserializer, bool autoCommit = true)
+    public SubscriptionStream(AsyncDuplexStreamingCall<Request, MessageBroker> streamingCall, Func<Stream, ValueTask<T>> deserializer, bool autoCommit = true)
     {
         _streamingCall = streamingCall;
         _deserializer = deserializer;
@@ -48,7 +48,7 @@ public sealed class SubscriptionStream<T> : IAsyncEnumerator<MessageBroker<T>>
                 _streamingCall.ResponseStream.Current.Topic, 
                 _streamingCall.ResponseStream.Current.MessageId, 
                 _streamingCall.ResponseStream.Current.DataAreaId, 
-                _deserializer(data.ToArray()));
+                await _deserializer(data));
 
             if (_autoCommit)
                 await _streamingCall.RequestStream.WriteAsync(new Request() { Commit = _autoCommit });

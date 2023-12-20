@@ -4,17 +4,16 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Collections.Generic;
 
-namespace Pars.Messaging;
+namespace Pars.Messaging.Json;
 
-public class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
+public class PolymorphicTypeResolver<T> : DefaultJsonTypeInfoResolver
 {
     private readonly JsonPolymorphismOptions _options;
-    private readonly Type _baseType;
+    private readonly Type _baseType = typeof(T);
 
-    public PolymorphicTypeResolver(Type baseType, IEnumerable<Type> derivedTypes = null, string typeDiscriminatorPropertyName = "$type", Func<Type, string> nameResolver = null)
+    public PolymorphicTypeResolver(IEnumerable<Type> derivedTypes = null, string typeDiscriminatorPropertyName = "$type", Func<Type, string> nameResolver = null)
     {
-        _baseType = baseType;
-        _options =  new JsonPolymorphismOptions()
+        _options = new JsonPolymorphismOptions()
         {
             TypeDiscriminatorPropertyName = typeDiscriminatorPropertyName,
             IgnoreUnrecognizedTypeDiscriminators = true,
@@ -25,8 +24,8 @@ public class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
             foreach (var derivedType in derivedTypes)
             {
                 _options.DerivedTypes.Add(
-                    nameResolver is null ? new JsonDerivedType(derivedType): new JsonDerivedType(derivedType, nameResolver(derivedType)));
-            }        
+                    nameResolver is null ? new JsonDerivedType(derivedType) : new JsonDerivedType(derivedType, nameResolver(derivedType)));
+            }
     }
 
     public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
@@ -34,7 +33,7 @@ public class PolymorphicTypeResolver : DefaultJsonTypeInfoResolver
         JsonTypeInfo jsonTypeInfo = base.GetTypeInfo(type, options);
         if (jsonTypeInfo.Type == _baseType)
         {
-            jsonTypeInfo.PolymorphismOptions = _options; 
+            jsonTypeInfo.PolymorphismOptions = _options;
         }
 
         return jsonTypeInfo;
