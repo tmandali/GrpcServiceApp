@@ -1,32 +1,41 @@
-﻿using ClientApp.Person;
-using Grpc.Net.Client;
+﻿using Grpc.Net.Client;
+using Pars.Messaging;
 
-using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/" //"http://localhost:5121"
-    , new() 
-    {
-        HttpHandler = new HttpClientHandler()
-        {
-            UseProxy = false,
-        }
-    }
-);
 
-var personStream = new PersonStream(channel);
-await personStream.WritePersonCreateAsync(
-    new SoftwareArchitech() { Id = 1, Name = "Timur" }, 
-    new SoftwareDeveloper() { Id = 1, Name = "Mehmet" });
+// The port number must match the port of the gRPC server.
+using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/"); 
+var client = new Greeter.GreeterClient(channel);
+var reply = await client.SayHelloAsync(
+                  new HelloRequest { Name = "GreeterClient" });
+Console.WriteLine("Greeting: " + reply.Message);
 
-var subscriber = personStream.CreateSubscription();
-while (await subscriber.MoveNextAsync())
-{
-    var result = subscriber.Current.Value switch
-    {
-        SoftwareArchitech architech => $"Architech {architech.Name}",
-        SoftwareDeveloper developer => $"Developer {developer.Name}",
-        _ => string.Empty
-    };
-    Console.WriteLine(result);
-}
+
+//using var channel = GrpcChannel.ForAddress("https://grpcerptest.azurewebsites.net/" //"http://localhost:5121"
+//    , new() 
+//    {
+//        HttpHandler = new HttpClientHandler()
+//        {
+//            UseProxy = false,
+//        }
+//    }
+//);
+
+//var personStream = new PersonStream(channel);
+//await personStream.WritePersonCreateAsync(
+//    new SoftwareArchitech() { Id = 1, Name = "Timur" }, 
+//    new SoftwareDeveloper() { Id = 1, Name = "Mehmet" });
+
+//var subscriber = personStream.CreateSubscription();
+//while (await subscriber.MoveNextAsync())
+//{
+//    var result = subscriber.Current.Value switch
+//    {
+//        SoftwareArchitech architech => $"Architech {architech.Name}",
+//        SoftwareDeveloper developer => $"Developer {developer.Name}",
+//        _ => string.Empty
+//    };
+//    Console.WriteLine(result);
+//}
 
 //Console.WriteLine("Subsriber begin"); 
 //var client = new SyncMqGateway.SyncMqGatewayClient(channel);
