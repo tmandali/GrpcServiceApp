@@ -15,7 +15,7 @@ Console.WriteLine("Greeting: " + reply.Message);
 
 //var personStream = new PersonStream(channel);
 //await personStream.WritePersonCreateAsync(
-//    new SoftwareArchitech() { Id = 1, Name = "Timur" }, 
+//    new SoftwareArchitech() { Id = 1, Name = "Timur" },
 //    new SoftwareDeveloper() { Id = 1, Name = "Mehmet" });
 
 //var subscriber = personStream.CreateSubscription();
@@ -29,3 +29,8 @@ Console.WriteLine("Greeting: " + reply.Message);
 //    };
 //    Console.WriteLine(result);
 //}
+
+
+Console.WriteLine("Shutting down");
+Console.WriteLine("Press any key to exit...");
+Console.ReadKey();

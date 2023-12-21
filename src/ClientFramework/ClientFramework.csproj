@@ -9,10 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Net.Http.WinHttpHandler" Version="8.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Pars.Messaging.SyncMqGateway\Pars.Messaging.SyncMqGateway.csproj" />
   </ItemGroup>
 
