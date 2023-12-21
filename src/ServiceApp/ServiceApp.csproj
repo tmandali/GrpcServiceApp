@@ -9,14 +9,12 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.57.0" />
-    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.59.0" />
     <PackageReference Include="Grpc.Core" Version="2.46.6" />
   </ItemGroup>
 	
   <ItemGroup>
-    <Protobuf Include="..\Pars.Messaging.SyncMqGateway\Protos\syncmq.proto" GrpcServices="Server">
-      <Link>Protos\syncmq.proto</Link>
-    </Protobuf>
+    <Protobuf Include="..\Pars.Messaging.SyncMqGateway\Protos\syncmq.proto" Link ="Protos\syncmq.proto" GrpcServices="Server"/>
+	<Protobuf Include="..\Pars.Messaging.SyncMqGateway\Protos\greet.proto" Link ="Protos\greet.proto" GrpcServices="Server"/>
   </ItemGroup>
 
 </Project>
