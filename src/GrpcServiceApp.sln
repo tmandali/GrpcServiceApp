@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceApp", "ServiceApp\Se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pars.Messaging.SyncMqGateway", "Pars.Messaging.SyncMqGateway\Pars.Messaging.SyncMqGateway.csproj", "{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientFramework", "ClientFramework\ClientFramework.csproj", "{A88563DF-44D5-4607-B908-4CCCE2584BB5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7FABF2F-4D38-4E00-80E6-A9B06D190CFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A88563DF-44D5-4607-B908-4CCCE2584BB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A88563DF-44D5-4607-B908-4CCCE2584BB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A88563DF-44D5-4607-B908-4CCCE2584BB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A88563DF-44D5-4607-B908-4CCCE2584BB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
